@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fertilizer Prediction</title>
+  <!-- Bootstrap CSS for quick styling -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container my-5">
+    <h2 class="text-center">Fertilizer Prediction</h2>
+    <form id="fertilizerForm">
+      <div class="form-group">
+        <label for="temperature">Temperature (°C):</label>
+        <input type="number" class="form-control" id="temperature" required>
+      </div>
+      <div class="form-group">
+        <label for="humidity">Humidity (%):</label>
+        <input type="number" class="form-control" id="humidity" required>
+      </div>
+      <div class="form-group">
+        <label for="moisture">Moisture (%):</label>
+        <input type="number" class="form-control" id="moisture" required>
+      </div>
+      <div class="form-group">
+        <label for="soilType">Soil Type:</label>
+        <select class="form-control" id="soilType" required>
+          <option value="">Select Soil Type</option>
+          <option value="Loamy">Loamy</option>
+          <option value="Sandy">Sandy</option>
+          <option value="Clayey">Clayey</option>
+          <option value="Silt">Silt</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cropType">Crop Type:</label>
+        <input type="text" class="form-control" id="cropType" placeholder="e.g., Maize, Paddy" required>
+      </div>
+      <div class="form-group">
+        <label for="nitrogen">Nitrogen:</label>
+        <input type="number" class="form-control" id="nitrogen" required>
+      </div>
+      <div class="form-group">
+        <label for="potassium">Potassium:</label>
+        <input type="number" class="form-control" id="potassium" required>
+      </div>
+      <div class="form-group">
+        <label for="phosphorous">Phosphorous:</label>
+        <input type="number" class="form-control" id="phosphorous" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Predict Fertilizer</button>
+    </form>
+    <div id="result" class="mt-4">
+      <!-- The prediction result will appear here -->
+    </div>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

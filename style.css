@@ -1,0 +1,21 @@
+body {
+    background: #f8f9fa;
+  }
+  
+  .container {
+    max-width: 600px;
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    margin-bottom: 20px;
+    color: #2d3e50;
+  }
+  
+  #result {
+    font-size: 1.2em;
+    text-align: center;
+  }
