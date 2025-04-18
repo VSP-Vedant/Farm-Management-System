@@ -1,0 +1,22 @@
+# Backend Dependencies
+Flask==2.3.3
+Flask-Cors==4.0.0
+mysql-connector-python==8.1.0
+numpy==1.24.3
+pandas==2.0.3
+scikit-learn==1.3.0
+joblib==1.3.1
+python-dotenv==1.0.0
+Werkzeug==2.3.7
+
+# Frontend Dependencies (Node.js packages)
+# Install these using npm install in the farm-management-ui directory:
+# @emotion/react@11.11.3
+# @emotion/styled@11.11.0
+# @mui/icons-material@5.15.10
+# @mui/material@5.15.10
+# axios@1.6.7
+# react@18.2.0
+# react-dom@18.2.0
+# react-router-dom@6.22.1
+# react-scripts@5.0.1 

@@ -11,7 +11,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import axios from 'axios';
+import { predictCropRotation } from '../services/apiService';
 
 const regions = ['North', 'South', 'East', 'West'];
 const seasons = ['Kharif', 'Rabi', 'Summer'];
@@ -53,8 +53,8 @@ function CropRotation() {
     setResult(null);
 
     try {
-      const response = await axios.post('http://localhost:5000/predict-croprotation', formData);
-      setResult(response.data.recommended_crop);
+      const response = await predictCropRotation(formData);
+      setResult(response.data);
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred while making the prediction');
     } finally {
@@ -253,7 +253,20 @@ function CropRotation() {
 
         {result && (
           <Alert severity="success" sx={{ mt: 3 }}>
-            Recommended Crop: <strong>{result}</strong>
+            <Typography variant="subtitle1" gutterBottom>
+              <strong>Recommended Crop Sequence:</strong>
+            </Typography>
+            {result.recommended_sequence.map((item, index) => (
+              <Typography key={index} variant="body2">
+                {item.season}: <strong>{item.crop}</strong>
+              </Typography>
+            ))}
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <strong>Soil Benefits:</strong> {result.soil_benefits}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Expected Yield Increase:</strong> {result.expected_yield_increase}
+            </Typography>
           </Alert>
         )}
       </Paper>

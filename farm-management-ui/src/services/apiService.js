@@ -27,5 +27,5 @@ export const getLivestock = () => axios.get(`${API_BASE_URL}/livestock`);
 export const addLivestock = (livestockData) => axios.post(`${API_BASE_URL}/livestock`, livestockData);
 
 // ML Predictions
-export const predictFertilizer = (data) => axios.post(`${API_BASE_URL}/predict-fertilizer`, data);
-export const predictCropRotation = (data) => axios.post(`${API_BASE_URL}/predict-croprotation`, data); 
+export const predictFertilizer = (data) => axios.post(`${API_BASE_URL}/predict/fertilizer`, data);
+export const predictCropRotation = (data) => axios.post(`${API_BASE_URL}/predict/crop-rotation`, data); 

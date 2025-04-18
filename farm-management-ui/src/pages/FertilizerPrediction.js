@@ -11,7 +11,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import axios from 'axios';
+import { predictFertilizer } from '../services/apiService';
 
 const soilTypes = ['Sandy', 'Loamy', 'Black', 'Red', 'Clayey'];
 const cropTypes = ['Maize', 'Sugarcane', 'Cotton', 'Tobacco', 'Paddy', 'Barley', 'Wheat', 'Millets', 'Oil seeds', 'Pulses', 'Ground Nuts'];
@@ -47,8 +47,8 @@ function FertilizerPrediction() {
     setResult(null);
 
     try {
-      const response = await axios.post('http://localhost:5000/predict-fertilizer', formData);
-      setResult(response.data.recommended_fertilizer);
+      const response = await predictFertilizer(formData);
+      setResult(response.data);
     } catch (err) {
       setError(err.response?.data?.error || 'An error occurred while making the prediction');
     } finally {
@@ -191,7 +191,20 @@ function FertilizerPrediction() {
 
         {result && (
           <Alert severity="success" sx={{ mt: 3 }}>
-            Recommended Fertilizer: <strong>{result}</strong>
+            <Typography variant="subtitle1" gutterBottom>
+              <strong>Recommended Fertilizer:</strong> {result.recommended_fertilizer}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Application Rate:</strong> {result.application_rate}
+            </Typography>
+            <Typography variant="body2">
+              <strong>Frequency:</strong> {result.frequency}
+            </Typography>
+            {result.notes && (
+              <Typography variant="body2">
+                <strong>Notes:</strong> {result.notes}
+              </Typography>
+            )}
           </Alert>
         )}
       </Paper>

@@ -5,7 +5,9 @@ import {
   getWorkers, 
   getVehicles, 
   getInventory, 
-  getLivestock 
+  getLivestock,
+  addOwner,
+  addFarm
 } from '../services/apiService';
 import { 
   Box, 
@@ -84,40 +86,40 @@ const Dashboard = () => {
     }
   };
 
+  const fetchData = async () => {
+    try {
+      const [
+        ownersRes,
+        farmsRes,
+        workersRes,
+        vehiclesRes,
+        inventoryRes,
+        livestockRes
+      ] = await Promise.all([
+        getOwners(),
+        getFarms(),
+        getWorkers(),
+        getVehicles(),
+        getInventory(),
+        getLivestock()
+      ]);
+
+      setData({
+        owners: ownersRes.data,
+        farms: farmsRes.data,
+        workers: workersRes.data,
+        vehicles: vehiclesRes.data,
+        inventory: inventoryRes.data,
+        livestock: livestockRes.data
+      });
+      setLoading(false);
+    } catch (err) {
+      setError('Error fetching data: ' + err.message);
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [
-          ownersRes,
-          farmsRes,
-          workersRes,
-          vehiclesRes,
-          inventoryRes,
-          livestockRes
-        ] = await Promise.all([
-          getOwners(),
-          getFarms(),
-          getWorkers(),
-          getVehicles(),
-          getInventory(),
-          getLivestock()
-        ]);
-
-        setData({
-          owners: ownersRes.data,
-          farms: farmsRes.data,
-          workers: workersRes.data,
-          vehicles: vehiclesRes.data,
-          inventory: inventoryRes.data,
-          livestock: livestockRes.data
-        });
-        setLoading(false);
-      } catch (err) {
-        setError('Error fetching data: ' + err.message);
-        setLoading(false);
-      }
-    };
-
     fetchData();
   }, []);
 
