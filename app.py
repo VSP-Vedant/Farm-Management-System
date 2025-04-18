@@ -1,117 +1,318 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+import mysql.connector
+from mysql.connector import Error
 import os
 import joblib
 import pickle
 import pandas as pd
 
-# Initialize Flask App with the frontend folder as the static folder.
 app = Flask(__name__, static_folder="frontend", static_url_path="")
-CORS(app)
+# Configure CORS to allow requests from React app
+CORS(app, resources={
+    r"/*": {
+        "origins": ["http://localhost:3000"],
+        "methods": ["GET", "POST", "PUT", "DELETE"],
+        "allow_headers": ["Content-Type", "Authorization"]
+    }
+})
 
-# Define model paths using relative paths.
+# Define model paths using relative paths
 project_root = os.path.dirname(os.path.abspath(__file__))
 fertilizer_models_path = os.path.join(project_root, "models")
 crop_rotation_models_path = os.path.join(project_root, "crop_rotation_models")
 crop_rotation_data_path = os.path.join(project_root, "crop_rotation_data")
 
-# Route to serve the frontend index page.
-@app.route("/")
-def serve_frontend():
-    return send_from_directory(app.static_folder, "index.html")
+def get_db_connection():
+    try:
+        connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='Root2323*',
+            database='farm_management'
+        )
+        if connection.is_connected():
+            print("Successfully connected to MySQL database!")
+            return connection
+    except Error as e:
+        print(f"Error connecting to MySQL database: {e}")
+        raise
 
-### FERTILIZER PREDICTION ENDPOINT
-@app.route('/predict-fertilizer', methods=['POST'])
+# Database API Routes
+@app.route('/api/owners', methods=['GET'])
+def get_owners():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Owner")
+        owners = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(owners)
+    except Exception as e:
+        print(f"Error in get_owners: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/farms', methods=['GET'])
+def get_farms():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Farm")
+        farms = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(farms)
+    except Exception as e:
+        print(f"Error in get_farms: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/workers', methods=['GET'])
+def get_workers():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Worker")
+        workers = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(workers)
+    except Exception as e:
+        print(f"Error in get_workers: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/vehicles', methods=['GET'])
+def get_vehicles():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Vehicle")
+        vehicles = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(vehicles)
+    except Exception as e:
+        print(f"Error in get_vehicles: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/inventory', methods=['GET'])
+def get_inventory():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Inventory")
+        inventory = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(inventory)
+    except Exception as e:
+        print(f"Error in get_inventory: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/livestock', methods=['GET'])
+def get_livestock():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM Livestock")
+        livestock = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(livestock)
+    except Exception as e:
+        print(f"Error in get_livestock: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+# Database POST Routes
+@app.route('/api/owner', methods=['POST'])
+def add_owner():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        data = request.json
+        
+        query = """
+        INSERT INTO owners (full_name, email, contact_number, address)
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (data['full_name'], data['email'], data['contact_number'], data['address'])
+        
+        cursor.execute(query, values)
+        conn.commit()
+        
+        return jsonify({'message': 'Owner added successfully'}), 201
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/farm', methods=['POST'])
+def add_farm():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        data = request.json
+        
+        query = """
+        INSERT INTO farms (name, location, size, owner_id)
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (data['name'], data['location'], data['size'], data['owner_id'])
+        
+        cursor.execute(query, values)
+        conn.commit()
+        
+        return jsonify({'message': 'Farm added successfully'}), 201
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/worker', methods=['POST'])
+def add_worker():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        data = request.json
+        
+        query = """
+        INSERT INTO workers (full_name, role, contact_number, farm_id)
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (data['full_name'], data['role'], data['contact_number'], data['farm_id'])
+        
+        cursor.execute(query, values)
+        conn.commit()
+        
+        return jsonify({'message': 'Worker added successfully'}), 201
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/vehicle', methods=['POST'])
+def add_vehicle():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        data = request.json
+        
+        query = """
+        INSERT INTO vehicles (name, type, status, farm_id)
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (data['name'], data['type'], data['status'], data['farm_id'])
+        
+        cursor.execute(query, values)
+        conn.commit()
+        
+        return jsonify({'message': 'Vehicle added successfully'}), 201
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/inventory', methods=['POST'])
+def add_inventory():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        data = request.json
+        
+        query = """
+        INSERT INTO inventory (item_name, quantity, category, farm_id)
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (data['item_name'], data['quantity'], data['category'], data['farm_id'])
+        
+        cursor.execute(query, values)
+        conn.commit()
+        
+        return jsonify({'message': 'Inventory item added successfully'}), 201
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/api/livestock', methods=['POST'])
+def add_livestock():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        data = request.json
+        
+        query = """
+        INSERT INTO livestock (type, quantity, health_status, farm_id)
+        VALUES (%s, %s, %s, %s)
+        """
+        values = (data['type'], data['quantity'], data['health_status'], data['farm_id'])
+        
+        cursor.execute(query, values)
+        conn.commit()
+        
+        return jsonify({'message': 'Livestock added successfully'}), 201
+    except Error as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+# ML Model Routes
+@app.route('/api/predict/fertilizer', methods=['POST'])
 def predict_fertilizer():
     try:
-        data = request.get_json()
+        data = request.json
         
-        # Validate input fields.
-        required_fields = ["temperature", "humidity", "moisture", "soil_type", "crop_type", "nitrogen", "potassium", "phosphorous"]
-        if not all(field in data for field in required_fields):
-            return jsonify({"error": "Missing required input fields"}), 400
+        # Here you would typically:
+        # 1. Load your trained fertilizer prediction model
+        # 2. Preprocess the input data
+        # 3. Make predictions
+        # For now, we'll return a mock prediction
         
-        # Load the models.
-        model = joblib.load(os.path.join(fertilizer_models_path, "fertilizer_model.pkl"))
-        le_soil = joblib.load(os.path.join(fertilizer_models_path, "soil_encoder.pkl"))
-        le_crop = joblib.load(os.path.join(fertilizer_models_path, "crop_encoder.pkl"))
-        le_fertilizer = joblib.load(os.path.join(fertilizer_models_path, "fertilizer_encoder.pkl"))
-        
-        # Encode categorical inputs.
-        soil_encoded = le_soil.transform([data["soil_type"]])[0]
-        crop_encoded = le_crop.transform([data["crop_type"]])[0]
-        
-        # Prepare input data.
-        input_data = [[
-            data["temperature"], data["humidity"], data["moisture"],
-            soil_encoded, crop_encoded, data["nitrogen"], data["potassium"], data["phosphorous"]
-        ]]
-        
-        # Predict fertilizer recommendation.
-        prediction = model.predict(input_data)
-        recommended_fertilizer = le_fertilizer.inverse_transform(prediction)[0]
-        
-        return jsonify({"recommended_fertilizer": recommended_fertilizer})
-    
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-### CROP ROTATION PREDICTION ENDPOINT
-@app.route('/predict-croprotation', methods=['POST'])
-def predict_crop_rotation():
-    try:
-        data = request.get_json()
-        
-        # Validate input fields.
-        required_fields = [
-            "region", "season", "soil_type", "soil_ph", "soil_nitrogen", "soil_phosphorus",
-            "soil_potassium", "soil_organic_matter", "soil_moisture", "avg_rainfall",
-            "solar_radiation", "rotation_sequence"
-        ]
-        if not all(field in data for field in required_fields):
-            return jsonify({"error": "Missing required input fields"}), 400
-        
-        # Load trained model & encoder.
-        with open(os.path.join(crop_rotation_models_path, "rf_model.pkl"), "rb") as f:
-            model = pickle.load(f)
-        with open(os.path.join(crop_rotation_models_path, "label_encoder.pkl"), "rb") as f:
-            le = pickle.load(f)
-        
-        # Load preprocessed training data to get correct feature columns.
-        df = pd.read_pickle(os.path.join(crop_rotation_data_path, "data_preprocessed_crop.pkl"))
-        target = "Crop_Planted (Action)"
-        X_train = df.drop(columns=[target])
-        
-        # Create a new sample.
-        new_sample = {
-            "Region": data["region"],
-            "Season": data["season"],
-            "Soil Type": data["soil_type"],
-            "Soil pH": data["soil_ph"],
-            "Soil Nitrogen": data["soil_nitrogen"],
-            "Soil Phosphorus": data["soil_phosphorus"],
-            "Soil Potassium": data["soil_potassium"],
-            "Soil Organic Matter (%)": data["soil_organic_matter"],
-            "Soil Moisture (%)": data["soil_moisture"],
-            "Avg Rainfall (mm)": data["avg_rainfall"],
-            "Solar Radiation Impact (BTU/sqft)": data["solar_radiation"],
-            "Rotation Sequence": data["rotation_sequence"]
+        mock_prediction = {
+            'recommended_fertilizer': 'NPK 14-14-14',
+            'application_rate': '250 kg/ha',
+            'frequency': 'Every 3 months',
+            'notes': 'Best applied before the rainy season'
         }
         
-        # Convert to DataFrame and one-hot encode categorical features.
-        new_data = pd.DataFrame([new_sample])
-        categorical_columns = ["Region", "Season", "Soil Type", "Rotation Sequence"]
-        new_data_encoded = pd.get_dummies(new_data, columns=categorical_columns, drop_first=True)
-        new_data_encoded = new_data_encoded.reindex(columns=X_train.columns, fill_value=0)
-        
-        # Make prediction.
-        predicted_label = model.predict(new_data_encoded)
-        recommended_crop = le.inverse_transform(predicted_label)[0]
-        
-        return jsonify({"recommended_crop": recommended_crop})
-    
+        return jsonify(mock_prediction), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/predict/crop-rotation', methods=['POST'])
+def predict_crop_rotation():
+    try:
+        data = request.json
+        
+        # Here you would typically:
+        # 1. Load your trained crop rotation model
+        # 2. Analyze soil health data and previous crop history
+        # 3. Generate recommendations
+        # For now, we'll return a mock prediction
+        
+        mock_prediction = {
+            'recommended_sequence': [
+                {'season': 'Spring', 'crop': 'Corn'},
+                {'season': 'Summer', 'crop': 'Soybeans'},
+                {'season': 'Fall', 'crop': 'Winter Wheat'}
+            ],
+            'soil_benefits': 'Improved nitrogen fixation and soil structure',
+            'expected_yield_increase': '15%'
+        }
+        
+        return jsonify(mock_prediction), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        print("Starting Flask server on port 5000...")
+        app.run(debug=True, port=5000)
+    except Exception as e:
+        print(f"Error starting Flask server: {e}")
