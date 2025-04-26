@@ -7,7 +7,8 @@ import {
   getInventory, 
   getLivestock,
   addOwner,
-  addFarm
+  addFarm,
+  addInventory
 } from '../services/apiService';
 import { 
   Box, 
@@ -73,9 +74,22 @@ const Dashboard = () => {
           response = await addOwner(formData);
           break;
         case 'farm':
-          response = await addFarm(formData);
+          // Convert area to number if it's a string
+          const farmData = {
+            ...formData,
+            area: Number(formData.area)
+          };
+          response = await addFarm(farmData);
           break;
-        // Add other cases for different types
+        case 'inventory':
+          // Convert numeric fields to numbers
+          const inventoryData = {
+            ...formData,
+            quantity: Number(formData.quantity),
+            cost_per_unit: Number(formData.cost_per_unit)
+          };
+          response = await addInventory(inventoryData);
+          break;
       }
       if (response) {
         fetchData(); // Refresh data
@@ -83,6 +97,7 @@ const Dashboard = () => {
       }
     } catch (err) {
       console.error('Error submitting form:', err);
+      setError('Error submitting form: ' + err.message);
     }
   };
 
@@ -180,7 +195,153 @@ const Dashboard = () => {
             </DialogActions>
           </Dialog>
         );
-      // Add other cases for different forms
+      case 'farm':
+        return (
+          <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <DialogTitle>Add New Farm</DialogTitle>
+            <DialogContent>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Farm Name"
+                    name="farm_name"
+                    value={formData.farm_name || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Location"
+                    name="location"
+                    value={formData.location || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Area"
+                    name="area"
+                    type="number"
+                    value={formData.area || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Soil Type"
+                    name="soil_type"
+                    value={formData.soil_type || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Irrigation Type"
+                    name="irrigation_type"
+                    value={formData.irrigation_type || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+              </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog}>Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">
+                Add Farm
+              </Button>
+            </DialogActions>
+          </Dialog>
+        );
+      case 'inventory':
+        return (
+          <Dialog open={openDialog} onClose={handleCloseDialog}>
+            <DialogTitle>Add New Inventory Item</DialogTitle>
+            <DialogContent>
+              <Grid container spacing={2} sx={{ mt: 1 }}>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Item Name"
+                    name="item_name"
+                    value={formData.item_name || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Category"
+                    name="category"
+                    value={formData.category || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Quantity"
+                    name="quantity"
+                    type="number"
+                    value={formData.quantity || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Unit"
+                    name="unit"
+                    value={formData.unit || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Cost per Unit"
+                    name="cost_per_unit"
+                    type="number"
+                    value={formData.cost_per_unit || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Supplier Name"
+                    name="supplier_name"
+                    value={formData.supplier_name || ''}
+                    onChange={handleInputChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Purchase Date"
+                    name="purchase_date"
+                    type="date"
+                    value={formData.purchase_date || ''}
+                    onChange={handleInputChange}
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog}>Cancel</Button>
+              <Button onClick={handleSubmit} variant="contained" color="primary">
+                Add Inventory
+              </Button>
+            </DialogActions>
+          </Dialog>
+        );
       default:
         return null;
     }
@@ -206,6 +367,7 @@ const Dashboard = () => {
     <Box p={3}>
       <Typography variant="h4" gutterBottom>Farm Management Dashboard</Typography>
       
+      {/* Owners Section */}
       <Box mb={4}>
         <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
           <Typography variant="h6">Owners</Typography>
@@ -242,16 +404,28 @@ const Dashboard = () => {
         </TableContainer>
       </Box>
 
+      {/* Farms Section */}
       <Box mb={4}>
-        <Typography variant="h6" gutterBottom>Farms</Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6">Farms</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog('farm')}
+          >
+            Add Farm
+          </Button>
+        </Box>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Name</TableCell>
+                <TableCell>Farm Name</TableCell>
                 <TableCell>Location</TableCell>
                 <TableCell>Area</TableCell>
                 <TableCell>Soil Type</TableCell>
+                <TableCell>Irrigation Type</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -261,6 +435,7 @@ const Dashboard = () => {
                   <TableCell>{farm.location}</TableCell>
                   <TableCell>{farm.area}</TableCell>
                   <TableCell>{farm.soil_type}</TableCell>
+                  <TableCell>{farm.irrigation_type}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -268,16 +443,30 @@ const Dashboard = () => {
         </TableContainer>
       </Box>
 
+      {/* Inventory Section */}
       <Box mb={4}>
-        <Typography variant="h6" gutterBottom>Inventory</Typography>
+        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+          <Typography variant="h6">Inventory</Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<AddIcon />}
+            onClick={() => handleOpenDialog('inventory')}
+          >
+            Add Inventory
+          </Button>
+        </Box>
         <TableContainer component={Paper}>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Item</TableCell>
+                <TableCell>Item Name</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Quantity</TableCell>
-                <TableCell>Cost</TableCell>
+                <TableCell>Unit</TableCell>
+                <TableCell>Cost per Unit</TableCell>
+                <TableCell>Supplier Name</TableCell>
+                <TableCell>Purchase Date</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -285,8 +474,11 @@ const Dashboard = () => {
                 <TableRow key={item.inventory_id}>
                   <TableCell>{item.item_name}</TableCell>
                   <TableCell>{item.category}</TableCell>
-                  <TableCell>{item.quantity} {item.unit}</TableCell>
-                  <TableCell>₹{item.cost_per_unit}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>{item.unit}</TableCell>
+                  <TableCell>{item.cost_per_unit}</TableCell>
+                  <TableCell>{item.supplier_name}</TableCell>
+                  <TableCell>{item.purchase_date}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

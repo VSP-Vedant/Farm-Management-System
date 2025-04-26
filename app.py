@@ -155,16 +155,23 @@ def add_farm():
         data = request.json
         
         query = """
-        INSERT INTO farms (name, location, size, owner_id)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO Farm (farm_name, location, area, soil_type, irrigation_type)
+        VALUES (%s, %s, %s, %s, %s)
         """
-        values = (data['name'], data['location'], data['size'], data['owner_id'])
+        values = (
+            data['farm_name'],
+            data['location'],
+            data['area'],
+            data['soil_type'],
+            data['irrigation_type']
+        )
         
         cursor.execute(query, values)
         conn.commit()
         
         return jsonify({'message': 'Farm added successfully'}), 201
     except Error as e:
+        print(f"Error in add_farm: {str(e)}")
         return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
@@ -224,16 +231,25 @@ def add_inventory():
         data = request.json
         
         query = """
-        INSERT INTO inventory (item_name, quantity, category, farm_id)
-        VALUES (%s, %s, %s, %s)
+        INSERT INTO Inventory (item_name, category, quantity, unit, cost_per_unit, supplier_name, purchase_date)
+        VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
-        values = (data['item_name'], data['quantity'], data['category'], data['farm_id'])
+        values = (
+            data['item_name'],
+            data['category'],
+            data['quantity'],
+            data['unit'],
+            data['cost_per_unit'],
+            data['supplier_name'],
+            data['purchase_date']
+        )
         
         cursor.execute(query, values)
         conn.commit()
         
         return jsonify({'message': 'Inventory item added successfully'}), 201
     except Error as e:
+        print(f"Error in add_inventory: {str(e)}")
         return jsonify({'error': str(e)}), 500
     finally:
         cursor.close()
