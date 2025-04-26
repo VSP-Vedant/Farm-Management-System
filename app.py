@@ -132,7 +132,7 @@ def add_owner():
         data = request.json
         
         query = """
-        INSERT INTO owners (full_name, email, contact_number, address)
+        INSERT INTO Owner (full_name, email, contact_number, address)
         VALUES (%s, %s, %s, %s)
         """
         values = (data['full_name'], data['email'], data['contact_number'], data['address'])
